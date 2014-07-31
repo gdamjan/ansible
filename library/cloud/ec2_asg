@@ -189,7 +189,8 @@ def create_autoscaling_group(connection, module):
                  group_name=group_name,
                  load_balancers=load_balancers,
                  availability_zones=availability_zones,
-                 launch_config=launch_configs[0],
+        #         launch_config=launch_configs[0],
+                 launch_config=launch_config_name
                  min_size=min_size,
                  max_size=max_size,
                  desired_capacity=desired_capacity,
