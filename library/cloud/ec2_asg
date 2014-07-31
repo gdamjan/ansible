@@ -45,6 +45,12 @@ options:
     description:
       - Name of the Launch configuration to use for the group. See the ec2_lc module for managing these.
     required: false
+  instance_id:
+    description:
+      - The ID of the Amazon EC2 instance you want to use to create the Auto Scaling group.
+    required: false
+    default: None
+    version_added: "1.7"
   min_size:
     description:
       - Minimum number of instances in group
@@ -121,7 +127,7 @@ except ImportError:
 
 ASG_ATTRIBUTES = ('launch_config_name', 'max_size', 'min_size', 'desired_capacity',
                      'vpc_zone_identifier', 'availability_zones',
-                     'health_check_period', 'health_check_type')
+                     'health_check_period', 'health_check_type', 'instance_id')
 
 def enforce_required_arguments(module):
     ''' As many arguments are not required for autoscale group deletion
@@ -156,7 +162,8 @@ def create_autoscaling_group(connection, module):
     set_tags = module.params.get('tags')
     health_check_period = module.params.get('health_check_period')
     health_check_type = module.params.get('health_check_type')
-    
+    instance_id = module.params.get('instance_id')
+
     as_groups = connection.get_all_groups(names=[group_name])
 
     if not vpc_zone_identifier and not availability_zones:
@@ -190,7 +197,8 @@ def create_autoscaling_group(connection, module):
                  connection=connection,
                  tags=asg_tags,
                  health_check_period=health_check_period,
-                 health_check_type=health_check_type)
+                 health_check_type=health_check_type,
+                 instance_id=instance_id)
 
         try:
             connection.create_auto_scaling_group(ag)
@@ -293,6 +301,7 @@ def main():
             tags=dict(type='list', default=[]),
             health_check_period=dict(type='int', default=300),
             health_check_type=dict(default='EC2', choices=['EC2', 'ELB']),
+            instance_id=dict(type='str'),
         )
     )
     module = AnsibleModule(argument_spec=argument_spec)
